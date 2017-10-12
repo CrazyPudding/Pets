@@ -10,7 +10,8 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<manifest package="com.example.android.pets"
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.android.pets"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
@@ -20,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".CatalogActivity"
+            android:name=".catalog.CatalogActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -28,13 +29,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".EditorActivity"
+            android:name=".editor.EditorActivity"
             android:theme="@style/EditorTheme"
-            android:parentActivityName=".CatalogActivity" >
+            android:parentActivityName=".catalog.CatalogActivity"
+            tools:targetApi="jelly_bean">
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CatalogActivity" />
+                android:value=".catalog.CatalogActivity" />
         </activity>
         <provider
             android:authorities="com.example.android.pets"
