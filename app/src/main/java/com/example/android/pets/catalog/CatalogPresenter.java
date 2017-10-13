@@ -1,8 +1,13 @@
 package com.example.android.pets.catalog;
 
+import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 
 import com.example.android.pets.data.PetContract;
 import com.example.android.pets.data.PetDbHelper;
@@ -11,15 +16,26 @@ import com.example.android.pets.data.PetDbHelper;
  * Presenter 层
  */
 
-public class CatalogPresenter implements CatalogContract.Presenter {
+public class CatalogPresenter implements CatalogContract.Presenter, LoaderManager.LoaderCallbacks<Cursor> {
+
+    private static final int LOADER_ID = 0;
 
     private CatalogContract.View mCatalogView;
+    private LoaderManager mLoaderManager;
+    private CursorLoader mCursorLoader;
 
-    public CatalogPresenter(CatalogContract.View catalogView) {
-        if (catalogView != null) {
+    public CatalogPresenter(LoaderManager loaderManager, CursorLoader cursorLoader, CatalogContract.View catalogView) {
+        if (loaderManager != null && cursorLoader != null && catalogView != null) {
+            mLoaderManager =loaderManager;
+            mCursorLoader = cursorLoader;
             mCatalogView = catalogView;
             mCatalogView.setPresenter(this);
         }
+    }
+
+    @Override
+    public void start() {
+        mLoaderManager.initLoader(LOADER_ID, null, this);
     }
 
     @Override
@@ -51,5 +67,20 @@ public class CatalogPresenter implements CatalogContract.Presenter {
     @Override
     public void openPetDetails(long id) {
         mCatalogView.showPetDetails(id);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mCatalogView.swapData(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mCatalogView.swapData(null);
     }
 }

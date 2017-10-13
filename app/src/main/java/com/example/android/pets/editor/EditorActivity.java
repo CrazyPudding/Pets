@@ -1,11 +1,13 @@
 package com.example.android.pets.editor;
 
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 
 import com.example.android.pets.BaseActivity;
 import com.example.android.pets.R;
+import com.example.android.pets.data.PetContract;
 import com.example.android.pets.util.ActivityUtils;
 
 /**
@@ -15,20 +17,21 @@ import com.example.android.pets.util.ActivityUtils;
 public class EditorActivity extends BaseActivity {
 
     private EditorFragment mEditorFragment;
+    private Uri mCurrentUri;
 
     @Override
     public void initView() {
-        Uri currentUri = getIntent().getData();
-        setToolbarTitle(currentUri);
+        mCurrentUri = getIntent().getData();
+        setToolbarTitle(mCurrentUri);
 
         mEditorFragment = (EditorFragment) getFragmentManager().findFragmentById(R.id.details_content_frame);
         if (mEditorFragment == null) {
             mEditorFragment = EditorFragment.newInstance();
             ActivityUtils.addFragmentToActivity(getFragmentManager(), mEditorFragment, R.id.details_content_frame);
         }
-        if (currentUri != null) {
+        if (mCurrentUri != null) {
             Bundle args = new Bundle();
-            args.putString("currentUri", String.valueOf(currentUri));
+            args.putString("mCurrentUri", String.valueOf(mCurrentUri));
             mEditorFragment.setArguments(args);
         }
     }
@@ -58,7 +61,19 @@ public class EditorActivity extends BaseActivity {
 
     @Override
     public void initData() {
-       new EditorPresenter(mEditorFragment);
+        if (mCurrentUri != null) {
+            String[] projection = {
+                    PetContract.PetEntry._ID,
+                    PetContract.PetEntry.COLUMN_PET_NAME,
+                    PetContract.PetEntry.COLUMN_PET_BREED,
+                    PetContract.PetEntry.COLUMN_PET_GENDER,
+                    PetContract.PetEntry.COLUMN_PET_WEIGHT
+            };
+            CursorLoader cursorLoader = new CursorLoader(this, mCurrentUri, projection, null, null, null);
+            new EditorPresenter(getLoaderManager(), cursorLoader, mEditorFragment);
+        } else {
+            new EditorPresenter(mEditorFragment);
+        }
     }
 
     @Override

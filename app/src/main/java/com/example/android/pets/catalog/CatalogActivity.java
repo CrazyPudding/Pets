@@ -1,7 +1,10 @@
 package com.example.android.pets.catalog;
 
+import android.content.CursorLoader;
+
 import com.example.android.pets.BaseActivity;
 import com.example.android.pets.R;
+import com.example.android.pets.data.PetContract;
 import com.example.android.pets.util.ActivityUtils;
 
 /**
@@ -24,8 +27,13 @@ public class CatalogActivity extends BaseActivity {
 
     @Override
     public void initData() {
-        // 创建 Presenter 实例
-        new CatalogPresenter(mCatalogFragment);
+        String[] projection = {
+                PetContract.PetEntry._ID,
+                PetContract.PetEntry.COLUMN_PET_NAME,
+                PetContract.PetEntry.COLUMN_PET_BREED,
+        };
+        CursorLoader cursorLoader = new CursorLoader(this, PetContract.PetEntry.CONTENT_URI, projection, null, null, null);
+        new CatalogPresenter(getLoaderManager(), cursorLoader, mCatalogFragment);
     }
 
     @Override

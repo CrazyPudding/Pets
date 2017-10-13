@@ -1,11 +1,7 @@
 package com.example.android.pets.editor;
 
 import android.app.Fragment;
-import android.app.LoaderManager;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
-import android.content.Loader;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -31,10 +27,9 @@ import com.example.android.pets.data.PetContract;
 /**
  * View 层
  */
-public class EditorFragment extends Fragment implements EditorContract.View, LoaderManager.LoaderCallbacks<Cursor> {
+public class EditorFragment extends Fragment implements EditorContract.View {
 
     private Uri mCurrentUri;
-    private static final int EDIT_LOADER = 1;
     private EditText mNameEditText;
     private EditText mBreedEditText;
     private EditText mWeightEditText;
@@ -62,13 +57,12 @@ public class EditorFragment extends Fragment implements EditorContract.View, Loa
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+    public void onResume() {
+        super.onResume();
         String uriString = getArguments().getString("currentUri");
         if (uriString != null) {
             mCurrentUri = Uri.parse(uriString);
-            getLoaderManager().initLoader(EDIT_LOADER, null, this);
+            mEditorPresenter.start();
         }
     }
 
@@ -259,33 +253,6 @@ public class EditorFragment extends Fragment implements EditorContract.View, Loa
                 mGenderSpinner.setSelection(0);
                 break;
         }
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case EDIT_LOADER:
-                String[] projection = {
-                        PetContract.PetEntry._ID,
-                        PetContract.PetEntry.COLUMN_PET_NAME,
-                        PetContract.PetEntry.COLUMN_PET_BREED,
-                        PetContract.PetEntry.COLUMN_PET_GENDER,
-                        PetContract.PetEntry.COLUMN_PET_WEIGHT
-                };
-                return new CursorLoader(getActivity(),mCurrentUri, projection, null, null, null);
-            default:
-                return null;
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mEditorPresenter.loadPet(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        showPetDetails("", "", 0, 0);
     }
 
     @Override

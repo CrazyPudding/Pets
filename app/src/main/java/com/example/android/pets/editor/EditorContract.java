@@ -26,6 +26,7 @@ public interface EditorContract {
     }
 
     interface Presenter {
+        void start();
         void loadPet(Cursor data);
         void setGender(int gender);
         int getGender();

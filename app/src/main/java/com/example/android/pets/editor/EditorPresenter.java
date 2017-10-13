@@ -1,9 +1,13 @@
 package com.example.android.pets.editor;
 
+import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.example.android.pets.data.PetContract;
@@ -12,12 +16,25 @@ import com.example.android.pets.data.PetContract;
  * Presenter 层
  */
 
-public class EditorPresenter implements EditorContract.Presenter {
+public class EditorPresenter implements EditorContract.Presenter, LoaderManager.LoaderCallbacks<Cursor> {
+
+    private static final int EDIT_LOADER = 1;
 
     private EditorContract.View mEditorView;
+    private LoaderManager mLoaderManager;
+    private CursorLoader mCursorLoader;
 
     public EditorPresenter(EditorContract.View editorView) {
         if (editorView != null) {
+            mEditorView = editorView;
+            mEditorView.setPresenter(this);
+        }
+    }
+
+    public EditorPresenter(LoaderManager loaderManager, CursorLoader cursorLoader, EditorContract.View editorView) {
+        if (loaderManager != null && cursorLoader != null &&editorView != null) {
+            mLoaderManager = loaderManager;
+            mCursorLoader = cursorLoader;
             mEditorView = editorView;
             mEditorView.setPresenter(this);
         }
@@ -33,6 +50,11 @@ public class EditorPresenter implements EditorContract.Presenter {
     @Override
     public int getGender() {
         return mGender;
+    }
+
+    @Override
+    public void start() {
+        mLoaderManager.initLoader(EDIT_LOADER, null, this);
     }
 
     @Override
@@ -98,5 +120,25 @@ public class EditorPresenter implements EditorContract.Presenter {
         } else {
             mEditorView.showDeleteSuccess();
         }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case EDIT_LOADER:
+                return mCursorLoader;
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        loadPet(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mEditorView.showPetDetails("", "", 0, 0);
     }
 }

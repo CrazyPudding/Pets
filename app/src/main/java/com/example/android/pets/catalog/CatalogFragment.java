@@ -1,12 +1,9 @@
 package com.example.android.pets.catalog;
 
 import android.app.Fragment;
-import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,19 +18,18 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.example.android.pets.editor.EditorActivity;
 import com.example.android.pets.PetCursorAdapter;
 import com.example.android.pets.R;
 import com.example.android.pets.data.PetContract;
 import com.example.android.pets.data.PetDbHelper;
+import com.example.android.pets.editor.EditorActivity;
 
 /**
  * View 层
  */
 
-public class CatalogFragment extends Fragment implements CatalogContract.View, LoaderManager.LoaderCallbacks<Cursor> {
+public class CatalogFragment extends Fragment implements CatalogContract.View {
 
-    private static final int LOADER_ID = 0;   // Loader id
     private CatalogContract.Presenter mCatalogPresenter;
     private PetCursorAdapter mCursorAdapter;
 
@@ -74,12 +70,15 @@ public class CatalogFragment extends Fragment implements CatalogContract.View, L
             }
         });
 
-        // 初始化 Loader
-        getLoaderManager().initLoader(LOADER_ID, null, this);
-
         // 设置选项菜单
         setHasOptionsMenu(true);
         return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mCatalogPresenter.start();
     }
 
     @Override
@@ -129,27 +128,7 @@ public class CatalogFragment extends Fragment implements CatalogContract.View, L
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case LOADER_ID:
-                String[] projection = {
-                        PetContract.PetEntry._ID,
-                        PetContract.PetEntry.COLUMN_PET_NAME,
-                        PetContract.PetEntry.COLUMN_PET_BREED,
-                };
-                return new CursorLoader(getActivity(), PetContract.PetEntry.CONTENT_URI, projection, null, null, null);
-            default:
-                return null;
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+    public void swapData(Cursor data) {
         mCursorAdapter.swapCursor(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mCursorAdapter.swapCursor(null);
     }
 }
